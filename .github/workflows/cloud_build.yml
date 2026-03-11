@@ -21,6 +21,9 @@ jobs:
           channel: 'stable'
           architecture: x64
 
+      - name: Generate Flutter Scaffolding
+        run: flutter create .
+
       - name: Install dependencies
         run: flutter pub get
 
