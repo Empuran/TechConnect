@@ -1,10 +1,7 @@
 name: Antigravity Cloud Build (Flutter)
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_dispatch:  # Only runs manually — click "Run workflow" in GitHub Actions tab
 
 jobs:
   build:
