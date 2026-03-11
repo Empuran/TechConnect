@@ -34,19 +34,19 @@ jobs:
         run: flutter build ios --release --no-codesign
 
       - name: Upload Android APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: TechConnect-Android-APK
           path: build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload Android AAB
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: TechConnect-Android-AAB
           path: build/app/outputs/bundle/release/app-release.aab
 
       - name: Upload iOS Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: TechConnect-iOS-Runner
           path: build/ios/iphoneos/Runner.app
