@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Nila — Find Your Moon</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0D0D1A;--surface:#1A1A2E;--surface2:#16213E;
+  --primary:#4A90D9;--accent:#FF6B6B;--gold:#FFD700;
+  --success:#4CAF50;--warning:#FF9800;--error:#E53935;
+  --text:#FFFFFF;--text2:#B0B0C3;--muted:#6B6B80;
+  --gradient:linear-gradient(135deg,#4A90D9,#7B4FD9);
+  --gradient2:linear-gradient(135deg,#FF6B6B,#FF8E53);
+}
+html,body{height:100%;background:#111;display:flex;justify-content:center;align-items:center;font-family:'Outfit',sans-serif;}
+.phone-shell{width:390px;height:760px;background:var(--bg);border-radius:40px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.8),0 0 0 1px rgba(255,255,255,0.05);}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* Transitions */
+.screen{transition:opacity .3s,transform .3s;}
+
+/* Common */
+.safe-top{padding-top:20px;}
+.btn-primary{width:100%;padding:16px;background:var(--primary);border:none;border-radius:16px;color:#fff;font-size:16px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btn-primary:active{transform:scale(.97);opacity:.9;}
+.btn-outline{width:100%;padding:14px;background:transparent;border:2px solid var(--primary);border-radius:14px;color:var(--primary);font-size:15px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;}
+.field{width:100%;background:var(--surface2);border:none;border-radius:14px;padding:16px 18px;color:var(--text);font-size:15px;font-family:'Outfit',sans-serif;outline:none;}
+.field:focus{box-shadow:0 0 0 1.5px var(--primary);}
+.field::placeholder{color:var(--muted);}
+.label{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;display:block;}
+.bottom-nav{display:flex;background:var(--surface);border-top:1px solid #2A2A3E;padding:8px 0 4px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;cursor:pointer;border:none;background:transparent;}
+.nav-icon{font-size:20px;}
+.nav-label{font-size:10px;color:var(--muted);font-family:'Outfit',sans-serif;}
+.nav-item.active .nav-label{color:var(--primary);}
+
+/* ─── SPLASH ──────────────────────────────── */
+#splash{background:var(--bg);align-items:center;justify-content:center;gap:24px;}
+.moon-icon{width:90px;height:90px;background:var(--gradient);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 0 40px rgba(74,144,217,.5);animation:moonPop .8s ease-out;}
+@keyframes moonPop{from{transform:scale(0.4);opacity:0;}to{transform:scale(1);opacity:1;}}
+.splash-text{text-align:center;animation:fadeUp .6s .6s both;}
+@keyframes fadeUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.app-name{font-size:52px;font-weight:300;letter-spacing:6px;color:#fff;}
+.tagline{font-size:13px;color:var(--muted);letter-spacing:2px;margin-top:6px;}
+
+/* ─── LOGIN ──────────────────────────────── */
+#login{padding:0 28px;}
+.login-logo{width:50px;height:50px;background:var(--gradient);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 20px rgba(74,144,217,.4);margin:60px 0 28px;}
+.info-box{background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.2);border-radius:12px;padding:12px;display:flex;gap:8px;align-items:flex-start;margin-top:12px;}
+.spacer{flex:1;}
+
+/* ─── OTP ──────────────────────────────── */
+#otp{padding:0 28px;}
+.otp-boxes{display:flex;gap:10px;justify-content:space-between;}
+.otp-box{width:48px;height:56px;background:var(--surface2);border:none;border-radius:12px;text-align:center;font-size:22px;font-weight:700;color:var(--text);font-family:'Outfit',sans-serif;outline:none;}
+.otp-box:focus{box-shadow:0 0 0 2px var(--primary);}
+.back-btn{background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px 8px;}
+
+/* ─── PROFILE SETUP ──────────────────────────────── */
+#setup{padding:0 24px;overflow-y:auto;}
+.progress-bar{display:flex;gap:6px;margin:20px 0 8px;}
+.prog-seg{height:4px;border-radius:4px;flex:1;background:var(--surface2);transition:background .3s;}
+.prog-seg.done{background:var(--primary);}
+.chip-wrap{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.chip{padding:8px 14px;border-radius:20px;background:var(--surface2);color:var(--text2);font-size:13px;cursor:pointer;border:1px solid transparent;font-family:'Outfit',sans-serif;}
+.chip.selected{background:var(--primary);color:#fff;font-weight:600;}
+.chip.tech.selected{background:var(--accent);}
+.gender-row{display:flex;gap:8px;margin-top:8px;}
+.gender-btn{flex:1;padding:12px;border-radius:12px;background:var(--surface2);border:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;}
+.gender-btn.selected{background:var(--primary);color:#fff;}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;}
+.photo-slot{aspect-ratio:3/4;background:var(--surface2);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px solid rgba(74,144,217,.2);cursor:pointer;font-size:28px;}
+.photo-slot span{font-size:11px;color:var(--primary);font-weight:600;}
+
+/* ─── SWIPE ──────────────────────────────── */
+#swipe{flex:1;overflow:hidden;}
+.swipe-top{display:flex;align-items:center;padding:16px 20px 0;}
+.logo-sm{font-size:24px;font-weight:300;letter-spacing:3px;color:var(--primary);}
+.card-stack{flex:1;position:relative;margin:12px 14px 8px;}
+.card{position:absolute;inset:0;border-radius:28px;overflow:hidden;cursor:grab;}
+.card:active{cursor:grabbing;}
+.card.back{transform:scale(.93) translateY(14px);z-index:0;}
+.card.front{z-index:1;transition:none;}
+.card-bg{width:100%;height:100%;display:flex;align-items:flex-end;position:relative;}
+.card-gradient-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 30%,rgba(0,0,0,.9) 100%);}
+.card-info{position:relative;z-index:2;padding:18px;}
+.card-name{font-size:24px;font-weight:700;color:#fff;}
+.card-sub{font-size:13px;color:rgba(255,255,255,.7);margin:2px 0 6px;}
+.card-bio{font-size:11px;color:rgba(255,255,255,.55);margin-bottom:10px;line-height:1.4;}
+.card-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.card-tag{padding:4px 10px;border-radius:10px;background:rgba(255,255,255,.15);font-size:11px;color:#fff;}
+.trust-badge{position:absolute;top:16px;left:16px;background:rgba(0,0,0,.5);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border:1px solid rgba(76,175,80,.4);color:#4CAF50;}
+.verified-badge{position:absolute;top:16px;right:16px;background:rgba(0,0,0,.5);border-radius:10px;padding:5px 10px;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--primary);}
+.swipe-label{position:absolute;top:36px;padding:8px 14px;border-radius:8px;font-size:18px;font-weight:800;letter-spacing:2px;opacity:0;transition:opacity .15s;z-index:3;}
+.swipe-label.like{left:24px;color:var(--success);border:2.5px solid var(--success);background:rgba(76,175,80,.1);}
+.swipe-label.pass{right:24px;color:var(--error);border:2.5px solid var(--error);background:rgba(229,57,53,.1);}
+.action-btns{display:flex;justify-content:center;align-items:center;gap:20px;padding:10px 0 12px;}
+.act-btn{width:56px;height:56px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:22px;transition:transform .15s;}
+.act-btn:active{transform:scale(.9);}
+.act-pass{background:var(--surface);box-shadow:0 4px 16px rgba(229,57,53,.3);}
+.act-star{background:var(--surface);box-shadow:0 4px 16px rgba(255,215,0,.2);font-size:18px;width:48px;height:48px;}
+.act-like{background:var(--surface);box-shadow:0 4px 16px rgba(255,107,107,.3);}
+
+/* ─── MATCHES ──────────────────────────────── */
+#matches{overflow-y:auto;}
+.new-matches{display:flex;gap:14px;overflow-x:auto;padding:0 20px 12px;scrollbar-width:none;}
+.new-match{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;}
+.avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;position:relative;}
+.avatar .online-dot{position:absolute;bottom:2px;right:2px;width:14px;height:14px;background:var(--success);border-radius:50%;border:2px solid var(--bg);}
+.match-card{margin:0 20px 10px;background:var(--surface);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;}
+.match-card:active{opacity:.8;}
+.new-tag{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px;}
+
+/* ─── CHAT ──────────────────────────────── */
+#chat{overflow:hidden;}
+.chat-header{background:var(--surface);padding:12px 16px;display:flex;align-items:center;gap:12px;}
+.icebreaker{margin:8px 12px;background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.3);border-radius:12px;padding:10px 14px;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--primary);cursor:pointer;}
+.msgs{flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:8px;}
+.msg{max-width:72%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.4;}
+.msg.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px;}
+.msg.them{align-self:flex-start;background:var(--surface);color:var(--text);border-bottom-left-radius:4px;}
+.msg-time{font-size:10px;opacity:.55;margin-top:3px;text-align:right;}
+.chat-input{background:var(--surface);padding:10px 14px;display:flex;align-items:center;gap:8px;}
+.chat-field{flex:1;background:var(--surface2);border:none;border-radius:24px;padding:10px 16px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;outline:none;}
+.send-btn{width:44px;height:44px;border-radius:50%;background:var(--gradient);border:none;color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;}
+
+/* ─── EVENTS ──────────────────────────────── */
+#events{overflow-y:auto;}
+.lunch-banner{margin:16px 20px 0;background:var(--gradient2);border-radius:18px;padding:16px;display:flex;gap:12px;align-items:center;}
+.lunch-text h3{font-size:15px;font-weight:700;color:#fff;}
+.lunch-text p{font-size:11px;color:rgba(255,255,255,.8);}
+.lunch-join{background:#fff;border:none;border-radius:10px;color:var(--accent);font-weight:700;padding:8px 14px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px;margin-left:auto;flex-shrink:0;}
+.event-card{margin:12px 20px 0;background:var(--surface);border-radius:16px;padding:16px;}
+.event-tag{display:inline-block;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:600;margin-bottom:10px;}
+.event-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.event-meta{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;margin-bottom:4px;}
+.rsvp-btn{width:100%;margin-top:12px;padding:10px;border:1.5px solid var(--primary);background:transparent;border-radius:10px;color:var(--primary);font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;}
+
+/* ─── PROFILE ──────────────────────────────── */
+#profile{overflow-y:auto;}
+.profile-photo-card{margin:16px 20px 0;background:var(--surface);border-radius:20px;overflow:hidden;}
+.profile-photo-area{height:180px;display:flex;align-items:center;justify-content:center;font-size:64px;background:linear-gradient(135deg,rgba(74,144,217,.3),var(--surface2));}
+.profile-card-info{padding:14px 16px;}
+.trust-score{padding:5px 10px;border-radius:10px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.verify-badges{display:flex;gap:8px;padding:14px 20px 0;flex-wrap:wrap;}
+.vbadge{padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;}
+.vbadge.yes{background:rgba(76,175,80,.15);color:var(--success);border:1px solid rgba(76,175,80,.3);}
+.vbadge.no{background:var(--surface2);color:var(--muted);}
+.completeness{margin:14px 20px 0;}
+.comp-bar{height:8px;background:var(--surface2);border-radius:8px;overflow:hidden;margin-top:6px;}
+.comp-fill{height:100%;background:var(--primary);border-radius:8px;width:60%;}
+.settings-list{margin:14px 0 24px;}
+.setting-item{display:flex;align-items:center;gap:14px;padding:14px 20px;cursor:pointer;}
+.setting-item:active{background:var(--surface2);}
+
+/* ─── MATCH POPUP ──────────────────────────────── */
+#match-popup{display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:99;align-items:flex-end;justify-content:center;}
+#match-popup.show{display:flex;}
+.match-sheet{background:var(--surface);border-radius:28px 28px 0 0;padding:28px 24px 36px;width:100%;text-align:center;}
+.match-heart{font-size:60px;margin-bottom:12px;}
+
+/* Scrollbar hide */
+::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body>
+<div class="phone-shell">
+
+<!-- ─── SPLASH ─────────────────────── -->
+<div class="screen active" id="splash">
+  <div class="moon-icon">🌙</div>
+  <div class="splash-text">
+    <div class="app-name">nila</div>
+    <div class="tagline">Find your moon</div>
+  </div>
+</div>
+
+<!-- ─── LOGIN ─────────────────────── -->
+<div class="screen" id="login">
+  <div class="login-logo">🌙</div>
+  <h2 style="font-size:24px;color:var(--text);margin-bottom:6px;">Welcome to nila</h2>
+  <p style="color:var(--text2);font-size:14px;line-height:1.5;margin-bottom:36px;">Meet verified tech professionals<br>near you at Infopark.</p>
+  <label class="label">Company Email</label>
+  <input class="field" type="email" placeholder="e.g. yourname@ust.com" id="email-input">
+  <div class="info-box" style="margin-top:12px;">
+    <span style="color:var(--primary);font-size:18px;">✔</span>
+    <span style="color:var(--primary);font-size:12px;">Only verified tech company emails allowed.</span>
+  </div>
+  <div class="spacer"></div>
+  <button class="btn-primary" onclick="go('otp')" style="margin-bottom:12px;">Continue</button>
+  <p style="text-align:center;font-size:11px;color:var(--muted);margin-bottom:28px;">By continuing you agree to our Terms & Privacy Policy</p>
+</div>
+
+<!-- ─── OTP ─────────────────────── -->
+<div class="screen" id="otp">
+  <div style="display:flex;align-items:center;padding:16px 12px 0;">
+    <button class="back-btn" onclick="go('login')">‹</button>
+  </div>
+  <div style="padding:8px 28px 0;">
+    <h2 style="font-size:24px;font-weight:600;color:var(--text);margin-bottom:6px;">Check your email</h2>
+    <p style="color:var(--text2);font-size:14px;margin-bottom:36px;">We sent a 6-digit OTP to<br><span style="color:var(--primary);font-weight:600;">yourname@ust.com</span></p>
+    <div class="otp-boxes">
+      <input class="otp-box" maxlength="1" type="number">
+      <input class="otp-box" maxlength="1" type="number">
+      <input class="otp-box" maxlength="1" type="number">
+      <input class="otp-box" maxlength="1" type="number">
+      <input class="otp-box" maxlength="1" type="number">
+      <input class="otp-box" maxlength="1" type="number">
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--text2);">Resend OTP in <span style="color:var(--primary);">28s</span></p>
+    <div class="spacer" style="height:200px;"></div>
+    <button class="btn-primary" onclick="go('setup')" style="margin-bottom:28px;">Verify & Continue</button>
+  </div>
+</div>
+
+<!-- ─── PROFILE SETUP ─────────────────────── -->
+<div class="screen" id="setup">
+  <div class="progress-bar safe-top">
+    <div class="prog-seg done" id="ps1"></div>
+    <div class="prog-seg" id="ps2"></div>
+    <div class="prog-seg" id="ps3"></div>
+  </div>
+  <p style="font-size:12px;color:var(--text2);margin:4px 0 20px;">Step 1 of 3</p>
+  <h2 style="font-size:22px;font-weight:600;color:var(--text);margin-bottom:4px;">Tell us about yourself</h2>
+  <p style="color:var(--text2);font-size:13px;margin-bottom:24px;">This helps us find the right matches for you</p>
+
+  <label class="label">Your Name</label>
+  <input class="field" placeholder="e.g. Arjun Nair" style="margin-bottom:16px;">
+
+  <label class="label">Date of Birth</label>
+  <input class="field" placeholder="DD / MM / YYYY" style="margin-bottom:16px;">
+
+  <label class="label">I am a...</label>
+  <div class="gender-row" style="margin-bottom:16px;">
+    <button class="gender-btn selected" onclick="selectGender(this)">Male</button>
+    <button class="gender-btn" onclick="selectGender(this)">Female</button>
+    <button class="gender-btn" onclick="selectGender(this)">Non-Binary</button>
+  </div>
+
+  <label class="label">Job Role</label>
+  <input class="field" placeholder="e.g. Software Engineer" style="margin-bottom:16px;">
+
+  <label class="label">Company</label>
+  <input class="field" placeholder="e.g. UST Global" style="margin-bottom:28px;">
+
+  <button class="btn-primary" onclick="go('home')" style="margin-bottom:32px;">Continue →</button>
+</div>
+
+<!-- ─── HOME SCREENS ─────────────────────── -->
+<div class="screen" id="home" style="flex-direction:column;">
+  <!-- SWIPE TAB -->
+  <div id="tab-swipe" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
+    <div class="swipe-top">
+      <span class="logo-sm">nila</span>
+      <div style="flex:1;"></div>
+      <button onclick="" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;">⚙</button>
+      <button onclick="" style="background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;margin-left:6px;">🔔</button>
+    </div>
+
+    <div class="card-stack" id="card-stack">
+      <!-- Back card -->
+      <div class="card back" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53);">
+        <div class="card-gradient-overlay"></div>
+        <div class="trust-badge">🛡 88% Trust</div>
+        <div class="verified-badge">✔ Verified</div>
+        <div class="card-info">
+          <div class="card-name">Anjali K, 28</div>
+          <div class="card-sub">Data Scientist · Infosys</div>
+          <div class="card-tags">
+            <div class="card-tag">AI/ML</div>
+            <div class="card-tag">Reading</div>
+            <div class="card-tag">Yoga</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Front card (draggable) -->
+      <div class="card front" id="front-card" style="background:linear-gradient(135deg,#4A90D9,#7B4FD9);"
+           onmousedown="dragStart(event)" ontouchstart="dragStart(event)">
+        <div class="card-gradient-overlay"></div>
+        <div class="swipe-label like" id="lbl-like">LIKE</div>
+        <div class="swipe-label pass" id="lbl-pass">PASS</div>
+        <div class="trust-badge">🛡 92% Trust</div>
+        <div class="verified-badge">✔ Verified</div>
+        <div class="card-info">
+          <div class="card-name">Priya M, 26</div>
+          <div class="card-sub">UX Designer · UST Global</div>
+          <div class="card-bio">Coffee lover ☕ · Design nerd · Exploring the Kochi food scene</div>
+          <div class="card-tags">
+            <div class="card-tag">UI/UX</div>
+            <div class="card-tag">Travel</div>
+            <div class="card-tag">Photography</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-btns">
+      <button class="act-btn act-pass" onclick="swipeCard(false)">✕</button>
+      <button class="act-btn act-star">⭐</button>
+      <button class="act-btn act-like" onclick="swipeCard(true)">❤️</button>
+    </div>
+  </div>
+
+  <!-- MATCHES TAB -->
+  <div id="tab-matches" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+    <div style="padding:20px 20px 0;">
+      <h2 style="font-size:22px;color:var(--text);">Matches</h2>
+      <p style="color:var(--text2);font-size:13px;">People who liked you back</p>
+    </div>
+    <div class="new-matches" style="margin-top:16px;">
+      <div class="new-match">
+        <div class="avatar" style="background:var(--gradient);">P<div class="online-dot"></div></div>
+        <span style="font-size:11px;color:var(--text);">Priya</span>
+      </div>
+      <div class="new-match">
+        <div class="avatar" style="background:var(--gradient2);">A<div class="online-dot"></div></div>
+        <span style="font-size:11px;color:var(--text);">Anjali</span>
+      </div>
+    </div>
+    <p style="font-size:13px;font-weight:600;color:var(--text);padding:4px 20px 8px;">All Matches</p>
+    <div style="overflow-y:auto;flex:1;">
+      <div class="match-card" onclick="go('chat')">
+        <div class="avatar" style="background:var(--gradient);width:50px;height:50px;font-size:18px;">P</div>
+        <div style="flex:1;">
+          <div style="display:flex;align-items:center;">
+            <span style="font-weight:600;color:var(--text);">Priya Menon</span>
+            <span class="new-tag">New</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);">UX Designer · UST</div>
+        </div>
+        <span style="color:var(--primary);font-size:20px;">💬</span>
+      </div>
+      <div class="match-card" onclick="go('chat')">
+        <div class="avatar" style="background:var(--gradient2);width:50px;height:50px;font-size:18px;">A</div>
+        <div style="flex:1;">
+          <span style="font-weight:600;color:var(--text);">Anjali K</span>
+          <div style="font-size:12px;color:var(--text2);">Data Scientist · Infosys</div>
+        </div>
+        <span style="color:var(--primary);font-size:20px;">💬</span>
+      </div>
+      <div class="match-card" onclick="go('chat')">
+        <div class="avatar" style="background:linear-gradient(135deg,#4CAF50,#45B3E0);width:50px;height:50px;font-size:18px;">R</div>
+        <div style="flex:1;">
+          <span style="font-weight:600;color:var(--text);">Rahul V</span>
+          <div style="font-size:12px;color:var(--text2);">DevOps Eng · TCS</div>
+        </div>
+        <span style="color:var(--primary);font-size:20px;">💬</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVENTS TAB -->
+  <div id="tab-events" style="display:none;flex:1;overflow-y:auto;">
+    <div style="padding:20px 20px 0;">
+      <h2 style="font-size:22px;color:var(--text);">Events</h2>
+      <p style="color:var(--text2);font-size:13px;">Tech meetups near Infopark</p>
+    </div>
+    <div class="lunch-banner">
+      <span style="font-size:32px;">🍱</span>
+      <div class="lunch-text">
+        <h3>Lunch Match!</h3>
+        <p>12 people looking for lunch today</p>
+      </div>
+      <button class="lunch-join">Join</button>
+    </div>
+    <p style="font-size:13px;font-weight:600;color:var(--text);padding:16px 20px 4px;">Upcoming Events</p>
+    <div class="event-card">
+      <div class="event-tag" style="background:rgba(74,144,217,.15);color:var(--primary);">⭐ Networking</div>
+      <div class="event-title">Tech Mixer Night</div>
+      <div class="event-meta">📅 Fri, Mar 14 · 7:00 PM</div>
+      <div class="event-meta">📍 Infopark Hub, Kochi · 34 attending</div>
+      <button class="rsvp-btn">RSVP</button>
+    </div>
+    <div class="event-card" style="margin-bottom:4px;">
+      <div class="event-tag" style="background:rgba(255,107,107,.15);color:var(--accent);">Casual</div>
+      <div class="event-title">Coffee & Code Meetup</div>
+      <div class="event-meta">📅 Sat, Mar 15 · 10:00 AM</div>
+      <div class="event-meta">📍 Infopark Phase 1 · 22 attending</div>
+      <button class="rsvp-btn">RSVP</button>
+    </div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div id="tab-profile" style="display:none;flex:1;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 20px 0;">
+      <h2 style="font-size:22px;color:var(--text);">My Profile</h2>
+      <span style="font-size:22px;cursor:pointer;">⚙️</span>
+    </div>
+    <div class="profile-photo-card">
+      <div class="profile-photo-area">👤</div>
+      <div class="profile-card-info">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:20px;font-weight:700;color:var(--text);">Arjun Nair, 27</div>
+          <div class="trust-score" style="background:rgba(76,175,80,.15);color:var(--success);border:1px solid rgba(76,175,80,.3);">🛡 70%</div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-top:2px;">Software Engineer · UST Global</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px;">📍 Infopark, Kochi</div>
+      </div>
+    </div>
+    <div class="verify-badges">
+      <div class="vbadge yes">✔ Email</div>
+      <div class="vbadge no">Selfie — Pending</div>
+      <div class="vbadge no">LinkedIn — Add</div>
+    </div>
+    <div class="completeness">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:13px;font-weight:600;color:var(--text);">Profile Complete</span><span style="font-size:12px;color:var(--muted);">60%</span></div>
+      <div class="comp-bar"><div class="comp-fill"></div></div>
+    </div>
+    <div class="settings-list">
+      <div style="font-size:13px;font-weight:600;color:var(--text);padding:14px 20px 4px;">Settings</div>
+      <div class="setting-item"><span>🎛</span><span style="flex:1;color:var(--text);">Discovery Preferences</span><span style="color:var(--muted);">›</span></div>
+      <div class="setting-item"><span>🔔</span><span style="flex:1;color:var(--text);">Notifications</span><span style="color:var(--muted);">›</span></div>
+      <div class="setting-item"><span>🔒</span><span style="flex:1;color:var(--text);">Privacy & Safety</span><span style="color:var(--muted);">›</span></div>
+      <div class="setting-item"><span>❓</span><span style="flex:1;color:var(--text);">Help & Support</span><span style="color:var(--muted);">›</span></div>
+      <div class="setting-item" onclick="go('login')"><span>🚪</span><span style="flex:1;color:var(--error);">Log Out</span></div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-item active" id="nav-discover" onclick="switchTab('swipe',this)">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Discover</span>
+    </button>
+    <button class="nav-item" id="nav-matches" onclick="switchTab('matches',this)">
+      <span class="nav-icon">❤️</span>
+      <span class="nav-label">Matches</span>
+    </button>
+    <button class="nav-item" id="nav-events" onclick="switchTab('events',this)">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Events</span>
+    </button>
+    <button class="nav-item" id="nav-profile" onclick="switchTab('profile',this)">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profile</span>
+    </button>
+  </div>
+</div>
+
+<!-- ─── CHAT ─────────────────────── -->
+<div class="screen" id="chat">
+  <div class="chat-header">
+    <button class="back-btn" onclick="go('home')">‹</button>
+    <div style="width:36px;height:36px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;">P</div>
+    <div>
+      <div style="font-weight:600;color:var(--text);font-size:15px;">Priya Menon</div>
+      <div style="font-size:11px;color:var(--success);">Active now</div>
+    </div>
+    <div style="flex:1;"></div>
+    <span style="font-size:20px;cursor:pointer;">⋮</span>
+  </div>
+  <div class="icebreaker" onclick="insertIcebreaker()">
+    <span>✨</span>
+    <span style="flex:1;">AI Icebreaker: "What's your favourite tech stack?"</span>
+    <span style="font-weight:700;">Use</span>
+  </div>
+  <div class="msgs" id="msgs">
+    <div class="msg them">Hey! I noticed you love AI/ML too! What are you working on? 🤖<div class="msg-time">10:30 AM</div></div>
+    <div class="msg me">Hi! Building NLP models at UST — recommendation engine stuff. You?<div class="msg-time">10:32 AM</div></div>
+    <div class="msg them">That's amazing! I'm in Computer Vision at Infosys. Let's exchange notes sometime 😄<div class="msg-time">10:33 AM</div></div>
+  </div>
+  <div class="chat-input">
+    <span style="font-size:20px;cursor:pointer;">🖼</span>
+    <input class="chat-field" id="chat-field" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="send-btn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- MATCH POPUP -->
+<div id="match-popup">
+  <div class="match-sheet">
+    <div class="match-heart">❤️</div>
+    <h2 style="font-size:26px;color:var(--text);margin-bottom:8px;">It's a Match! 🎉</h2>
+    <p style="color:var(--text2);margin-bottom:24px;">You and Anjali liked each other!</p>
+    <div style="display:flex;gap:12px;">
+      <button class="btn-outline" onclick="closeMatch()" style="flex:1;">Keep Swiping</button>
+      <button class="btn-primary" onclick="closeMatch();go('chat');" style="flex:1;">Message</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Screen navigation
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='home'){
+    // Reset to swipe tab
+    switchTab('swipe', document.getElementById('nav-discover'));
+  }
+}
+
+// Bottom nav tab switching
+function switchTab(tab, btn){
+  ['swipe','matches','events','profile'].forEach(t=>{
+    const el=document.getElementById('tab-'+t);
+    el.style.display=(t===tab?'flex':'none');
+  });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+}
+
+// Gender selection
+function selectGender(btn){
+  document.querySelectorAll('.gender-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// Interest chip toggle
+document.querySelectorAll('.chip').forEach(c=>{
+  c.onclick=()=>c.classList.toggle('selected');
+});
+
+// Card drag / swipe
+let startX=0,startY=0,isDragging=false;
+const card=document.getElementById('front-card');
+const lblLike=document.getElementById('lbl-like');
+const lblPass=document.getElementById('lbl-pass');
+
+function dragStart(e){
+  isDragging=true;
+  startX=e.touches?e.touches[0].clientX:e.clientX;
+  startY=e.touches?e.touches[0].clientY:e.clientY;
+  card.style.transition='none';
+  document.addEventListener('mousemove',dragMove);
+  document.addEventListener('mouseup',dragEnd);
+  document.addEventListener('touchmove',dragMove,{passive:false});
+  document.addEventListener('touchend',dragEnd);
+}
+function dragMove(e){
+  if(!isDragging)return;
+  if(e.preventDefault)e.preventDefault();
+  const cx=e.touches?e.touches[0].clientX:e.clientX;
+  const cy=e.touches?e.touches[0].clientY:e.clientY;
+  const dx=cx-startX, dy=cy-startY;
+  const rot=dx*0.07;
+  card.style.transform=`translate(${dx}px,${dy}px) rotate(${rot}deg)`;
+  lblLike.style.opacity=dx>30?Math.min(1,(dx-30)/50):'0';
+  lblPass.style.opacity=dx<-30?Math.min(1,(-dx-30)/50):'0';
+}
+function dragEnd(e){
+  if(!isDragging)return;
+  isDragging=false;
+  const transform=card.style.transform;
+  const match=transform.match(/translate\(([^p]+)px/);
+  const dx=match?parseFloat(match[1]):0;
+  if(dx>90)swipeCard(true);
+  else if(dx<-90)swipeCard(false);
+  else resetCard();
+  document.removeEventListener('mousemove',dragMove);
+  document.removeEventListener('mouseup',dragEnd);
+  document.removeEventListener('touchmove',dragMove);
+  document.removeEventListener('touchend',dragEnd);
+}
+function resetCard(){
+  card.style.transition='transform .35s ease';
+  card.style.transform='';
+  lblLike.style.opacity='0';
+  lblPass.style.opacity='0';
+}
+function swipeCard(liked){
+  card.style.transition='transform .4s ease,opacity .4s ease';
+  if(liked){
+    card.style.transform='translate(150%,0) rotate(20deg)';
+    document.getElementById('match-popup').classList.add('show');
+  } else {
+    card.style.transform='translate(-150%,0) rotate(-20deg)';
+  }
+  card.style.opacity='0';
+  lblLike.style.opacity='0';
+  lblPass.style.opacity='0';
+  setTimeout(()=>{
+    card.style.transition='none';
+    card.style.transform='';
+    card.style.opacity='1';
+  },500);
+}
+function closeMatch(){
+  document.getElementById('match-popup').classList.remove('show');
+  resetCard();
+}
+
+// Chat
+function sendMsg(){
+  const f=document.getElementById('chat-field');
+  const text=f.value.trim();
+  if(!text)return;
+  const msgs=document.getElementById('msgs');
+  const div=document.createElement('div');
+  div.className='msg me';
+  div.innerHTML=text+'<div class="msg-time">Now</div>';
+  msgs.appendChild(div);
+  f.value='';
+  msgs.scrollTop=msgs.scrollHeight;
+}
+function insertIcebreaker(){
+  document.getElementById('chat-field').value="What's your favourite tech stack? 😄";
+  document.getElementById('chat-field').focus();
+}
+
+// OTP boxes auto-advance
+document.querySelectorAll('.otp-box').forEach((box,i,boxes)=>{
+  box.addEventListener('input',()=>{
+    if(box.value&&i<boxes.length-1)boxes[i+1].focus();
+  });
+});
+
+// Auto-advance splash
+setTimeout(()=>go('login'),2200);
+</script>
+</body>
+</html>
