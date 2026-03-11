@@ -1,0 +1,52 @@
+name: Antigravity Cloud Build (Flutter)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Release MVP
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          architecture: x64
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+
+      - name: Build iOS IPA (No Code Signing for Cloud Artifact)
+        run: flutter build ios --release --no-codesign
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: TechConnect-Android-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload Android AAB
+        uses: actions/upload-artifact@v3
+        with:
+          name: TechConnect-Android-AAB
+          path: build/app/outputs/bundle/release/app-release.aab
+
+      - name: Upload iOS Build
+        uses: actions/upload-artifact@v3
+        with:
+          name: TechConnect-iOS-Runner
+          path: build/ios/iphoneos/Runner.app
